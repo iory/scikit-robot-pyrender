@@ -34,11 +34,12 @@ dev_requirements = [
     'tox',               # Automatic virtualenv testing
 ]
 
-docs_requirements = [
-    'sphinx',            # General doc library
-    'sphinx_rtd_theme',  # RTD theme for sphinx
-    'sphinx-automodapi'  # For generating nice tables
-]
+docs_requirements = []
+with open('requirements_docs.txt') as f:
+    for line in f:
+        req = line.split('#')[0].strip()
+        if req:  # Skip empty lines
+            docs_requirements.append(req)
 
 
 setup(
