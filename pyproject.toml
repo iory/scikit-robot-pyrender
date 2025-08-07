@@ -1,6 +1,6 @@
 [tool.ruff]
 # Exclude directories from linting
-extend-exclude = [".?*", "src/", "build", "docs"]
+extend-exclude = [".?*", "src/", "build", "docs", "examples", "tests"]
 line-length = 120
 
 [tool.ruff.lint]

@@ -36,7 +36,7 @@ def determine_version(module_name):
 
 
 try:
-    __version__ = determine_version('pyrender')
+    __version__ = determine_version('scikit-robot-pyrender')
 except Exception:
     __version__ = '0.1.45'  # fallback version
 

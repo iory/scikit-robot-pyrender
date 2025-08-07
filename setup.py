@@ -1,17 +1,16 @@
-"""
-Setup of pyrender Python codebase.
-
-Author: Matthew Matl
-"""
 import sys
+
 from setuptools import setup
 
+
 __version__ = '0.1.45'
+
 
 def get_imageio_dep():
     if sys.version[0] == "2":
         return 'imageio<=2.6.1'
     return 'imageio'
+
 
 requirements = [
     'freetype-py',                # For font loading
@@ -43,30 +42,34 @@ docs_requirements = [
 
 
 setup(
-    name = 'pyrender',
+    name='scikit-robot-pyrender',
     version=__version__,
     description='Easy-to-use Python renderer for 3D visualization',
     long_description='A simple implementation of Physically-Based Rendering '
-                       '(PBR) in Python. Compliant with the glTF 2.0 standard.',
-    author='Matthew Matl',
-    author_email='matthewcmatl@gmail.com',
+                       '(PBR) in Python. Compliant with the glTF 2.0 standard. '
+                       'This is a fork of pyrender with improved OpenGL fallback capabilities.',
+    author='Matthew Matl (original), Iori Yanokura (fork)',
+    author_email='yanokura@jsk.imi.i.u-tokyo.ac.jp',
     license='MIT License',
-    url = 'https://github.com/mmatl/pyrender',
-    classifiers = [
+    url='https://github.com/iory/scikit-robot-pyrender',
+    classifiers=[
         'Development Status :: 4 - Beta',
         'License :: OSI Approved :: MIT License',
         'Operating System :: POSIX :: Linux',
         'Operating System :: MacOS :: MacOS X',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
+        'Programming Language :: Python :: 3.12',
+        'Programming Language :: Python :: 3.13',
         'Natural Language :: English',
         'Topic :: Scientific/Engineering'
     ],
-    keywords = 'rendering graphics opengl 3d visualization pbr gltf',
-    packages = ['pyrender', 'pyrender.platforms'],
-    setup_requires = requirements,
-    install_requires = requirements,
+    keywords='rendering graphics opengl 3d visualization pbr gltf',
+    packages=['pyrender', 'pyrender.platforms'],
+    setup_requires=requirements,
+    install_requires=requirements,
     extras_require={
         'dev': dev_requirements,
         'docs': docs_requirements,

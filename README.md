@@ -1,16 +1,27 @@
-# Pyrender
+# scikit-robot-pyrender
 
-[![Build Status](https://travis-ci.org/mmatl/pyrender.svg?branch=master)](https://travis-ci.org/mmatl/pyrender)
-[![Documentation Status](https://readthedocs.org/projects/pyrender/badge/?version=latest)](https://pyrender.readthedocs.io/en/latest/?badge=latest)
-[![Coverage Status](https://coveralls.io/repos/github/mmatl/pyrender/badge.svg?branch=master)](https://coveralls.io/github/mmatl/pyrender?branch=master)
-[![PyPI version](https://badge.fury.io/py/pyrender.svg)](https://badge.fury.io/py/pyrender)
-[![Downloads](https://pepy.tech/badge/pyrender)](https://pepy.tech/project/pyrender)
+[![Run Tests](https://github.com/iory/scikit-robot-pyrender/actions/workflows/test.yml/badge.svg)](https://github.com/iory/scikit-robot-pyrender/actions/workflows/test.yml)
+[![PyPI version](https://badge.fury.io/py/scikit-robot-pyrender.svg)](https://badge.fury.io/py/scikit-robot-pyrender)
 
-Pyrender is a pure Python (2.7, 3.4, 3.5, 3.6) library for physically-based
-rendering and visualization.
-It is designed to meet the [glTF 2.0 specification from Khronos](https://www.khronos.org/gltf/).
+A fork of [pyrender](https://github.com/mmatl/pyrender) with enhanced OpenGL compatibility.
 
-Pyrender is lightweight, easy to install, and simple to use.
+This package provides improved OpenGL fallback capabilities, making it more reliable on various systems including:
+- WSL2 environments
+- Systems with limited OpenGL support
+- Headless servers
+- Virtual machines
+
+## Key Improvements
+
+- **Robust OpenGL fallback**: Automatically falls back from OpenGL 4.1 → 4.0 → 3.3 with software rendering as needed
+- **WSL2 support**: Enhanced compatibility with Windows Subsystem for Linux
+- **Better error reporting**: Detailed troubleshooting information for OpenGL issues
+- **Automatic software rendering**: Enables software rendering when hardware acceleration fails
+
+scikit-robot-pyrender is a pure Python library for physically-based
+rendering and visualization, designed to meet the [glTF 2.0 specification from Khronos](https://www.khronos.org/gltf/).
+
+The library is lightweight, easy to install, and simple to use.
 It comes packaged with both an intuitive scene viewer and a headache-free
 offscreen renderer with support for GPU-accelerated rendering on headless
 servers, which makes it perfect for machine learning applications.
