@@ -31,8 +31,8 @@ jobs:
         uses: iory/github-action-bump-version@v1.0.0
         with:
           bump_type: ${{ github.event.inputs.bump_type }}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          base_branch: 'master'
+          github_token: ${{ secrets.AUTO_MERGE_PAT }}
+          base_branch: 'main'
           labels: 'auto-merge-ok,release'
 
       - name: Print Versions
