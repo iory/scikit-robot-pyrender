@@ -1,0 +1,42 @@
+[tool.ruff]
+# Exclude directories from linting
+extend-exclude = [".?*", "src/", "build", "docs", "examples", "tests"]
+line-length = 120
+
+[tool.ruff.lint]
+preview = true
+
+# Enable flake8-style rules
+select = [
+    "E", # style errors
+    "F", # flakes
+    "W", # style warnings
+    "G", # flake8-logging-format
+    "I", # import sorting
+]
+# Ignore specific rules to match current flake8 config
+ignore = [
+    "E741",  # ambiguous variable name
+    "F403",  # `from OpenGL.GL import *` used; unable to detect undefined names
+    "F405",  # may be undefined, or defined from star imports
+]
+
+[tool.ruff.lint.per-file-ignores]
+"pyrender/platforms/egl.py" = ["E402"]  # Module level import not at top of file (required for EGL setup)
+
+[tool.ruff.lint.isort]
+# Match current isort configuration
+force-single-line = true
+force-sort-within-sections = true
+order-by-type = false
+lines-after-imports = 2
+
+[tool.typos]
+default.extend-ignore-re = [
+    "(?Rm)^.*(#|//)\\s*spellchecker:disable-line$",  # spellchecker:disable-line
+    "(?s)(#|//)\\s*spellchecker:off.*?\\n\\s*(#|//)\\s*spellchecker:on",  # spellchecker:<on|off>
+]
+
+default.extend-ignore-identifiers-re = [
+    # Add individual words here to ignore them
+]

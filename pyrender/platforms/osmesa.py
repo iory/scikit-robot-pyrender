@@ -16,12 +16,14 @@ class OSMesaPlatform(Platform):
 
     def init_context(self):
         from OpenGL import arrays
-        from OpenGL.osmesa import (
-            OSMesaCreateContextAttribs, OSMESA_FORMAT,
-            OSMESA_RGBA, OSMESA_PROFILE, OSMESA_CORE_PROFILE,
-            OSMESA_CONTEXT_MAJOR_VERSION, OSMESA_CONTEXT_MINOR_VERSION,
-            OSMESA_DEPTH_BITS
-        )
+        from OpenGL.osmesa import OSMESA_CONTEXT_MAJOR_VERSION
+        from OpenGL.osmesa import OSMESA_CONTEXT_MINOR_VERSION
+        from OpenGL.osmesa import OSMESA_CORE_PROFILE
+        from OpenGL.osmesa import OSMESA_DEPTH_BITS
+        from OpenGL.osmesa import OSMESA_FORMAT
+        from OpenGL.osmesa import OSMESA_PROFILE
+        from OpenGL.osmesa import OSMESA_RGBA
+        from OpenGL.osmesa import OSMesaCreateContextAttribs
 
         attrs = arrays.GLintArray.asArray([
             OSMESA_FORMAT, OSMESA_RGBA,
@@ -39,7 +41,7 @@ class OSMesaPlatform(Platform):
     def make_current(self):
         from OpenGL import GL as gl
         from OpenGL.osmesa import OSMesaMakeCurrent
-        assert(OSMesaMakeCurrent(
+        assert (OSMesaMakeCurrent(
             self._context, self._buffer, gl.GL_UNSIGNED_BYTE,
             self.viewport_width, self.viewport_height
         ))

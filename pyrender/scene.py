@@ -3,13 +3,16 @@ https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#reference-sce
 
 Author: Matthew Matl
 """
-import numpy as np
 import networkx as nx
+import numpy as np
 import trimesh
 
-from .mesh import Mesh
 from .camera import Camera
-from .light import Light, PointLight, DirectionalLight, SpotLight
+from .light import DirectionalLight
+from .light import Light
+from .light import PointLight
+from .light import SpotLight
+from .mesh import Mesh
 from .node import Node
 from .utils import format_color_vector
 
@@ -224,10 +227,10 @@ class Scene(object):
                 mesh = mesh_node.mesh
                 pose = self.get_pose(mesh_node)
                 corners_local = trimesh.bounds.corners(mesh.bounds)
-                corners_world = pose[:3,:3].dot(corners_local.T).T + pose[:3,3]
+                corners_world = pose[:3, :3].dot(corners_local.T).T + pose[:3, 3]
                 corners.append(corners_world)
             if len(corners) == 0:
-                self._bounds = np.zeros((2,3))
+                self._bounds = np.zeros((2, 3))
             else:
                 corners = np.vstack(corners)
                 self._bounds = np.array([np.min(corners, axis=0),

@@ -4,11 +4,13 @@ https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#reference-cam
 Author: Matthew Matl
 """
 import abc
-import numpy as np
-import six
 import sys
 
-from .constants import DEFAULT_Z_NEAR, DEFAULT_Z_FAR
+import numpy as np
+import six
+
+from .constants import DEFAULT_Z_FAR
+from .constants import DEFAULT_Z_NEAR
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -191,7 +193,7 @@ class PerspectiveCamera(Camera):
         n = self.znear
         f = self.zfar
 
-        P = np.zeros((4,4))
+        P = np.zeros((4, 4))
         P[0][0] = 1.0 / (a * t)
         P[1][1] = 1.0 / t
         P[3][2] = -1.0
@@ -301,7 +303,7 @@ class OrthographicCamera(Camera):
 
         n = self.znear
         f = self.zfar
-        P = np.zeros((4,4))
+        P = np.zeros((4, 4))
         P[0][0] = 1.0 / xmag
         P[1][1] = 1.0 / ymag
         P[2][2] = 2.0 / (n - f)
@@ -414,7 +416,7 @@ class IntrinsicsCamera(Camera):
             fx = self.fx * 2.0
             fy = self.fy * 2.0
 
-        P = np.zeros((4,4))
+        P = np.zeros((4, 4))
         P[0][0] = 2.0 * fx / width
         P[1][1] = 2.0 * fy / height
         P[0][2] = 1.0 - 2.0 * cx / width

@@ -4,11 +4,14 @@ https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#reference-pri
 Author: Matthew Matl
 """
 import numpy as np
-
 from OpenGL.GL import *
 
-from .material import Material, MetallicRoughnessMaterial
-from .constants import FLOAT_SZ, UINT_SZ, BufFlags, GLTF
+from .constants import BufFlags
+from .constants import FLOAT_SZ
+from .constants import GLTF
+from .constants import UINT_SZ
+from .material import Material
+from .material import MetallicRoughnessMaterial
 from .utils import format_color_array
 
 
@@ -87,7 +90,7 @@ class Primitive(object):
         self.poses = poses
 
         self._bounds = None
-        self._vaid = None
+        self._vertex_array_id = None
         self._buffers = []
         self._is_transparent = None
         self._buf_flags = None
@@ -149,7 +152,7 @@ class Primitive(object):
                     value.shape[1] < 2):
                 raise ValueError('Incorrect texture coordinate shape')
             if value.shape[1] > 2:
-                value = value[:,:2]
+                value = value[:, :2]
         self._texcoord_0 = value
 
     @property
@@ -267,7 +270,7 @@ class Primitive(object):
             value = np.asanyarray(value, dtype=np.float32)
             value = np.ascontiguousarray(value)
             if value.ndim == 2:
-                value = value[np.newaxis,:,:]
+                value = value[np.newaxis, :, :]
             if value.shape[1] != 4 or value.shape[2] != 4:
                 raise ValueError('Pose matrices must be of shape (n,4,4), '
                                  'got {}'.format(value.shape))
@@ -317,12 +320,12 @@ class Primitive(object):
         return self._compute_transparency()
 
     def _add_to_context(self):
-        if self._vaid is not None:
+        if self._vertex_array_id is not None:
             raise ValueError('Mesh is already bound to a context')
 
         # Generate and bind VAO
-        self._vaid = glGenVertexArrays(1)
-        glBindVertexArray(self._vaid)
+        self._vertex_array_id = glGenVertexArrays(1)
+        glBindVertexArray(self._vertex_array_id)
 
         #######################################################################
         # Fill vertex buffer
@@ -387,7 +390,7 @@ class Primitive(object):
 
         if self.poses is not None:
             pose_data = np.ascontiguousarray(
-                np.transpose(self.poses, [0,2,1]).flatten().astype(np.float32)
+                np.transpose(self.poses, [0, 2, 1]).flatten().astype(np.float32)
             )
         else:
             pose_data = np.ascontiguousarray(
@@ -425,20 +428,20 @@ class Primitive(object):
         glBindVertexArray(0)
 
     def _remove_from_context(self):
-        if self._vaid is not None:
-            glDeleteVertexArrays(1, [self._vaid])
+        if self._vertex_array_id is not None:
+            glDeleteVertexArrays(1, [self._vertex_array_id])
             glDeleteBuffers(len(self._buffers), self._buffers)
-            self._vaid = None
+            self._vertex_array_id = None
             self._buffers = []
 
     def _in_context(self):
-        return self._vaid is not None
+        return self._vertex_array_id is not None
 
     def _bind(self):
-        if self._vaid is None:
+        if self._vertex_array_id is None:
             raise ValueError('Cannot bind a Mesh that has not been added '
                              'to a context')
-        glBindVertexArray(self._vaid)
+        glBindVertexArray(self._vertex_array_id)
 
     def _unbind(self):
         glBindVertexArray(0)
@@ -452,8 +455,8 @@ class Primitive(object):
 
         # If instanced, compute translations for approximate bounds
         if self.poses is not None:
-            bounds += np.array([np.min(self.poses[:,:3,3], axis=0),
-                                np.max(self.poses[:,:3,3], axis=0)])
+            bounds += np.array([np.min(self.poses[:, :3, 3], axis=0),
+                                np.max(self.poses[:, :3, 3], axis=0)])
         return bounds
 
     def _compute_transparency(self):
@@ -464,7 +467,7 @@ class Primitive(object):
         if self._is_transparent is None:
             self._is_transparent = False
             if self.color_0 is not None:
-                if np.any(self._color_0[:,3] != 1.0):
+                if np.any(self._color_0[:, 3] != 1.0):
                     self._is_transparent = True
         return self._is_transparent
 

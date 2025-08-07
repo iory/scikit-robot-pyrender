@@ -3,7 +3,8 @@
 import copy
 import os
 import sys
-from threading import Thread, RLock
+from threading import RLock
+from threading import Thread
 import time
 
 import imageio
@@ -11,27 +12,42 @@ import numpy as np
 import OpenGL
 import trimesh
 
+
 try:
-    from Tkinter import Tk, tkFileDialog as filedialog
+    from Tkinter import Tk
+    from Tkinter import tkFileDialog as filedialog
 except Exception:
     try:
-        from tkinter import Tk, filedialog as filedialog
+        from tkinter import filedialog as filedialog
+        from tkinter import Tk
     except Exception:
         pass
 
-from .constants import (TARGET_OPEN_GL_MAJOR, TARGET_OPEN_GL_MINOR,
-                        MIN_OPEN_GL_MAJOR, MIN_OPEN_GL_MINOR,
-                        TEXT_PADDING, DEFAULT_SCENE_SCALE,
-                        DEFAULT_Z_FAR, DEFAULT_Z_NEAR, RenderFlags, TextAlign)
-from .light import DirectionalLight
-from .node import Node
-from .camera import PerspectiveCamera, OrthographicCamera, IntrinsicsCamera
-from .trackball import Trackball
-from .renderer import Renderer
-from .mesh import Mesh
-
 import pyglet
 from pyglet import clock
+
+from .camera import IntrinsicsCamera
+from .camera import OrthographicCamera
+from .camera import PerspectiveCamera
+from .constants import DEFAULT_SCENE_SCALE
+from .constants import DEFAULT_Z_FAR
+from .constants import DEFAULT_Z_NEAR
+from .constants import MIN_OPEN_GL_MAJOR
+from .constants import MIN_OPEN_GL_MINOR
+from .constants import RenderFlags
+from .constants import TARGET_OPEN_GL_MAJOR
+from .constants import TARGET_OPEN_GL_MINOR
+from .constants import TEXT_PADDING
+from .constants import TextAlign
+from .light import DirectionalLight
+from .mesh import Mesh
+from .node import Node
+from .opengl_utils import create_opengl_configs
+from .opengl_utils import warn_fallback_version
+from .renderer import Renderer
+from .trackball import Trackball
+
+
 pyglet.options['shadow_window'] = False
 
 
@@ -999,36 +1015,50 @@ class Viewer(pyglet.window.Window):
         # Try multiple configs starting with target OpenGL version
         # and multisampling and removing these options if exception
         # Note: multisampling not available on all hardware
-        from pyglet.gl import Config
-        confs = [Config(sample_buffers=1, samples=4,
-                        depth_size=24,
-                        double_buffer=True,
-                        major_version=TARGET_OPEN_GL_MAJOR,
-                        minor_version=TARGET_OPEN_GL_MINOR),
-                 Config(depth_size=24,
-                        double_buffer=True,
-                        major_version=TARGET_OPEN_GL_MAJOR,
-                        minor_version=TARGET_OPEN_GL_MINOR),
-                 Config(sample_buffers=1, samples=4,
-                        depth_size=24,
-                        double_buffer=True,
-                        major_version=MIN_OPEN_GL_MAJOR,
-                        minor_version=MIN_OPEN_GL_MINOR),
-                 Config(depth_size=24,
-                        double_buffer=True,
-                        major_version=MIN_OPEN_GL_MAJOR,
-                        minor_version=MIN_OPEN_GL_MINOR)]
-        for conf in confs:
+
+        # Get OpenGL configurations to try
+        confs = create_opengl_configs()
+
+        errors = []
+        context_initialized = False
+        for desc, major, minor, mode, conf in confs:
             try:
+                # For problematic systems, try setting software rendering
+                if desc in ["LEGACY", "MINIMAL"] and not os.environ.get('LIBGL_ALWAYS_SOFTWARE'):
+                    os.environ['LIBGL_ALWAYS_SOFTWARE'] = '1'
+
                 super(Viewer, self).__init__(config=conf, resizable=True,
                                              width=self._viewport_size[0],
                                              height=self._viewport_size[1])
+                context_initialized = True
+                # Success - warn if using fallback version
+                warn_fallback_version(major, minor, TARGET_OPEN_GL_MAJOR, TARGET_OPEN_GL_MINOR)
                 break
-            except pyglet.window.NoSuchConfigException:
-                pass
+            except Exception as e:
+                # Catch all exceptions during context creation
+                error_msg = f"OpenGL {major}.{minor} {mode}: {type(e).__name__}: {e}"
+                errors.append(error_msg)
+                continue
 
-        if not self.context:
-            raise ValueError('Unable to initialize an OpenGL 3+ context')
+        if not context_initialized or not self.context:
+            error_summary = "\n".join([f"  - {err}" for err in errors])
+
+            # Suggest troubleshooting steps
+            troubleshooting = (
+                "\nTroubleshooting suggestions:\n"
+                "1. For SSH/headless: export DISPLAY=:0 or use VirtualGL\n"
+                "2. For software rendering: export LIBGL_ALWAYS_SOFTWARE=1\n"
+                "3. For Mesa override: export MESA_GL_VERSION_OVERRIDE=3.3\n"
+                "4. For debugging: export PYRENDER_DEBUG_OPENGL=1\n"
+                "5. Check: glxinfo | grep 'OpenGL version'"
+            )
+
+            raise ValueError(
+                f'Unable to initialize any OpenGL context.\n'
+                f'Attempted configurations:\n{error_summary}\n'
+                f'Minimum requirement: OpenGL {MIN_OPEN_GL_MAJOR}.{MIN_OPEN_GL_MINOR}+\n'
+                f'{troubleshooting}'
+            )
         clock.schedule_interval(
             Viewer._time_event, 1.0 / self.viewer_flags['refresh_rate'], self
         )
@@ -1046,14 +1076,14 @@ class Viewer(pyglet.window.Window):
 
         s2 = 1.0 / np.sqrt(2.0)
         cp = np.eye(4)
-        cp[:3,:3] = np.array([
+        cp[:3, :3] = np.array([
             [0.0, -s2, s2],
             [1.0, 0.0, 0.0],
             [0.0, s2, s2]
         ])
         hfov = np.pi / 6.0
         dist = scale / (2.0 * np.tan(hfov))
-        cp[:3,3] = dist * np.array([1.0, 0.0, 1.0]) + centroid
+        cp[:3, 3] = dist * np.array([1.0, 0.0, 1.0]) + centroid
 
         return cp
 
@@ -1077,7 +1107,7 @@ class Viewer(pyglet.window.Window):
             y = np.cross(z, x)
 
             matrix = np.eye(4)
-            matrix[:3,:3] = np.c_[x,y,z]
+            matrix[:3, :3] = np.c_[x, y, z]
             nodes.append(Node(
                 light=DirectionalLight(color=np.ones(3), intensity=1.0),
                 matrix=matrix

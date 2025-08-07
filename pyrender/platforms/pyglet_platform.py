@@ -1,8 +1,13 @@
-from pyrender.constants import (TARGET_OPEN_GL_MAJOR, TARGET_OPEN_GL_MINOR,
-                                MIN_OPEN_GL_MAJOR, MIN_OPEN_GL_MINOR)
-from .base import Platform
+import os
 
 import OpenGL
+
+from pyrender.constants import TARGET_OPEN_GL_MAJOR
+from pyrender.constants import TARGET_OPEN_GL_MINOR
+from pyrender.opengl_utils import create_opengl_configs
+from pyrender.opengl_utils import warn_fallback_version
+
+from .base import Platform
 
 
 __all__ = ['PygletPlatform']
@@ -27,39 +32,67 @@ class PygletPlatform(Platform):
             pass
 
         self._window = None
-        confs = [pyglet.gl.Config(sample_buffers=1, samples=4,
-                                  depth_size=24,
-                                  double_buffer=True,
-                                  major_version=TARGET_OPEN_GL_MAJOR,
-                                  minor_version=TARGET_OPEN_GL_MINOR),
-                 pyglet.gl.Config(depth_size=24,
-                                  double_buffer=True,
-                                  major_version=TARGET_OPEN_GL_MAJOR,
-                                  minor_version=TARGET_OPEN_GL_MINOR),
-                 pyglet.gl.Config(sample_buffers=1, samples=4,
-                                  depth_size=24,
-                                  double_buffer=True,
-                                  major_version=MIN_OPEN_GL_MAJOR,
-                                  minor_version=MIN_OPEN_GL_MINOR),
-                 pyglet.gl.Config(depth_size=24,
-                                  double_buffer=True,
-                                  major_version=MIN_OPEN_GL_MAJOR,
-                                  minor_version=MIN_OPEN_GL_MINOR)]
-        for conf in confs:
+
+        # Get OpenGL configurations to try
+        confs = create_opengl_configs()
+
+        errors = []
+        for desc, major, minor, mode, conf in confs:
             try:
+                # For problematic systems, try setting software rendering
+                if desc in ["LEGACY", "MINIMAL"] and not os.environ.get('LIBGL_ALWAYS_SOFTWARE'):
+                    os.environ['LIBGL_ALWAYS_SOFTWARE'] = '1'
+
                 self._window = pyglet.window.Window(config=conf, visible=False,
                                                     resizable=False,
                                                     width=1, height=1)
+                # Success - warn if using fallback version
+                warn_fallback_version(major, minor, TARGET_OPEN_GL_MAJOR, TARGET_OPEN_GL_MINOR)
                 break
-            except pyglet.window.NoSuchConfigException as e:
-                pass
+            except Exception as e:
+                # Catch all exceptions during context creation
+                error_msg = f"OpenGL {major}.{minor} {mode}: {type(e).__name__}: {e}"
+                errors.append(error_msg)
+                continue
 
         if not self._window:
+            error_summary = "\n".join([f"  - {err}" for err in errors])
+
+            # Detect WSL for specific troubleshooting
+            is_wsl = False
+            try:
+                with open('/proc/version', 'r') as f:
+                    if 'microsoft' in f.read().lower():
+                        is_wsl = True
+            except Exception:
+                pass
+
+            # Suggest troubleshooting steps
+            if is_wsl:
+                troubleshooting = (
+                    "\nWSL2 Troubleshooting suggestions:\n"
+                    "1. Install X11 server on Windows (VcXsrv, Xming)\n"
+                    "2. export DISPLAY=:0 (or your X server display)\n"
+                    "3. For software rendering: export LIBGL_ALWAYS_SOFTWARE=1\n"
+                    "4. Install OpenGL libraries: sudo apt install mesa-utils libgl1-mesa-glx\n"
+                    "5. For debugging: export PYRENDER_DEBUG_OPENGL=1\n"
+                    "6. Test with: glxinfo | grep 'OpenGL version'\n"
+                    "7. Alternative: Use Docker with X11 forwarding"
+                )
+            else:
+                troubleshooting = (
+                    "\nTroubleshooting suggestions:\n"
+                    "1. For SSH/headless: export DISPLAY=:0 or use VirtualGL\n"
+                    "2. For software rendering: export LIBGL_ALWAYS_SOFTWARE=1\n"
+                    "3. For Mesa override: export MESA_GL_VERSION_OVERRIDE=3.3\n"
+                    "4. For debugging: export PYRENDER_DEBUG_OPENGL=1\n"
+                    "5. Check: glxinfo | grep 'OpenGL version'"
+                )
+
             raise ValueError(
-                'Failed to initialize Pyglet window with an OpenGL >= 3+ '
-                'context. If you\'re logged in via SSH, ensure that you\'re '
-                'running your script with vglrun (i.e. VirtualGL). The '
-                'internal error message was "{}"'.format(e)
+                f'Failed to initialize Pyglet window with any OpenGL context.\n'
+                f'Attempted configurations:\n{error_summary}\n'
+                f'{troubleshooting}'
             )
 
     def make_current(self):

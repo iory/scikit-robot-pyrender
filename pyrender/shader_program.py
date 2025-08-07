@@ -1,9 +1,9 @@
 """OpenGL shader program wrapper.
 """
-import numpy as np
 import os
 import re
 
+import numpy as np
 import OpenGL
 from OpenGL.GL import *
 from OpenGL.GL import shaders as gl_shader_utils
@@ -54,7 +54,7 @@ class ShaderProgramCache(object):
             shader_names.append(name)
         cid = OpenGL.contextdata.getContext()
         key = tuple([cid] + sorted(
-            [(s,1) for s in shader_names] + [(d, defines[d]) for d in defines]
+            [(s, 1) for s in shader_names] + [(d, defines[d]) for d in defines]
         ))
 
         if key not in self._program_cache:
@@ -259,25 +259,25 @@ class ShaderProgram(object):
             pass
 
     _FUNC_MAP = {
-        (1,'u'): glUniform1uiv,
-        (2,'u'): glUniform2uiv,
-        (3,'u'): glUniform3uiv,
-        (4,'u'): glUniform4uiv,
-        (1,'i'): glUniform1iv,
-        (2,'i'): glUniform2iv,
-        (3,'i'): glUniform3iv,
-        (4,'i'): glUniform4iv,
-        (1,'f'): glUniform1fv,
-        (2,'f'): glUniform2fv,
-        (3,'f'): glUniform3fv,
-        (4,'f'): glUniform4fv,
-        (2,2): glUniformMatrix2fv,
-        (2,3): glUniformMatrix2x3fv,
-        (2,4): glUniformMatrix2x4fv,
-        (3,2): glUniformMatrix3x2fv,
-        (3,3): glUniformMatrix3fv,
-        (3,4): glUniformMatrix3x4fv,
-        (4,2): glUniformMatrix4x2fv,
-        (4,3): glUniformMatrix4x3fv,
-        (4,4): glUniformMatrix4fv,
+        (1, 'u'): glUniform1uiv,
+        (2, 'u'): glUniform2uiv,
+        (3, 'u'): glUniform3uiv,
+        (4, 'u'): glUniform4uiv,
+        (1, 'i'): glUniform1iv,
+        (2, 'i'): glUniform2iv,
+        (3, 'i'): glUniform3iv,
+        (4, 'i'): glUniform4iv,
+        (1, 'f'): glUniform1fv,
+        (2, 'f'): glUniform2fv,
+        (3, 'f'): glUniform3fv,
+        (4, 'f'): glUniform4fv,
+        (2, 2): glUniformMatrix2fv,
+        (2, 3): glUniformMatrix2x3fv,
+        (2, 4): glUniformMatrix2x4fv,
+        (3, 2): glUniformMatrix3x2fv,
+        (3, 3): glUniformMatrix3fv,
+        (3, 4): glUniformMatrix3x4fv,
+        (4, 2): glUniformMatrix4x2fv,
+        (4, 3): glUniformMatrix4x3fv,
+        (4, 4): glUniformMatrix4fv,
     }

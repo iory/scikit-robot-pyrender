@@ -2,16 +2,17 @@
 
 Author: Matthew Matl
 """
-import freetype
-import numpy as np
 import os
 
+import freetype
+import numpy as np
 import OpenGL
 from OpenGL.GL import *
 
-from .constants import TextAlign, FLOAT_SZ
-from .texture import Texture
+from .constants import FLOAT_SZ
+from .constants import TextAlign
 from .sampler import Sampler
+from .texture import Texture
 
 
 class FontCache(object):

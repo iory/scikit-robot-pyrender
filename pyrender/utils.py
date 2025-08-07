@@ -37,12 +37,12 @@ def format_color_array(value, shape):
 
     # Match up shapes
     if value.ndim == 1:
-        value = np.tile(value, (shape[0],1))
+        value = np.tile(value, (shape[0], 1))
     if value.shape[1] < shape[1]:
         nc = shape[1] - value.shape[1]
         value = np.column_stack((value, np.ones((value.shape[0], nc))))
     elif value.shape[1] > shape[1]:
-        value = value[:,:shape[1]]
+        value = value[:, :shape[1]]
     return value.astype(np.float32)
 
 
@@ -74,37 +74,37 @@ def format_texture_source(texture, target_channels='RGB'):
 
         # Format array by picking out correct texture channels or padding
         if texture.ndim == 2:
-            texture = texture[:,:,np.newaxis]
+            texture = texture[:, :, np.newaxis]
         if target_channels == 'R':
-            texture = texture[:,:,0]
+            texture = texture[:, :, 0]
             texture = texture.squeeze()
         elif target_channels == 'RG':
             if texture.shape[2] == 1:
                 texture = np.repeat(texture, 2, axis=2)
             else:
-                texture = texture[:,:,(0,1)]
+                texture = texture[:, :, (0, 1)]
         elif target_channels == 'GB':
             if texture.shape[2] == 1:
                 texture = np.repeat(texture, 2, axis=2)
             elif texture.shape[2] > 2:
-                texture = texture[:,:,(1,2)]
+                texture = texture[:, :, (1, 2)]
         elif target_channels == 'RGB':
             if texture.shape[2] == 1:
                 texture = np.repeat(texture, 3, axis=2)
             elif texture.shape[2] == 2:
                 raise ValueError('Cannot reformat 2-channel texture into RGB')
             else:
-                texture = texture[:,:,(0,1,2)]
+                texture = texture[:, :, (0, 1, 2)]
         elif target_channels == 'RGBA':
             if texture.shape[2] == 1:
                 texture = np.repeat(texture, 4, axis=2)
-                texture[:,:,3] = 255
+                texture[:, :, 3] = 255
             elif texture.shape[2] == 2:
                 raise ValueError('Cannot reformat 2-channel texture into RGBA')
             elif texture.shape[2] == 3:
                 tx = np.empty((texture.shape[0], texture.shape[1], 4), dtype=np.uint8)
-                tx[:,:,:3] = texture
-                tx[:,:,3] = 255
+                tx[:, :, :3] = texture
+                tx[:, :, 3] = 255
                 texture = tx
         else:
             raise ValueError('Invalid texture channel specification: {}'
