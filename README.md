@@ -1,6 +1,7 @@
 # scikit-robot-pyrender
 
 [![Run Tests](https://github.com/iory/scikit-robot-pyrender/actions/workflows/test.yml/badge.svg)](https://github.com/iory/scikit-robot-pyrender/actions/workflows/test.yml)
+![Python Versions](https://img.shields.io/pypi/pyversions/scikit-robot-pyrender.svg)
 [![PyPI version](https://badge.fury.io/py/scikit-robot-pyrender.svg)](https://badge.fury.io/py/scikit-robot-pyrender)
 
 A fork of [pyrender](https://github.com/mmatl/pyrender) with enhanced OpenGL compatibility.
