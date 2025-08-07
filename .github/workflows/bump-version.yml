@@ -28,7 +28,7 @@ jobs:
 
       - name: Bump Version
         id: bump
-        uses: iory/github-action-bump-version@v1.0.0
+        uses: iory/github-action-bump-version@v1.1.0
         with:
           bump_type: ${{ github.event.inputs.bump_type }}
           github_token: ${{ secrets.AUTO_MERGE_PAT }}
