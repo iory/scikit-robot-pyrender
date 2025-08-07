@@ -6,12 +6,14 @@ https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_mate
 Author: Matthew Matl
 """
 import abc
+
 import numpy as np
 import six
 
 from .constants import TexFlags
-from .utils import format_color_vector, format_texture_source
 from .texture import Texture
+from .utils import format_color_vector
+from .utils import format_texture_source
 
 
 @six.add_metaclass(abc.ABCMeta)

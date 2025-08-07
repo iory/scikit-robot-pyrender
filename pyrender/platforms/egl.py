@@ -5,6 +5,7 @@ import OpenGL.platform
 
 from .base import Platform
 
+
 EGL_PLATFORM_DEVICE_EXT = 0x313F
 EGL_DRM_DEVICE_FILE_EXT = 0x3233
 
@@ -80,7 +81,7 @@ def get_device_by_index(device_id):
 
     devices = query_devices()
     if device_id >= len(devices):
-        raise ValueError('Invalid device ID ({})'.format(device_id, len(devices)))
+        raise ValueError('Invalid device ID ({})'.format(device_id))
     return devices[device_id]
 
 
@@ -126,20 +127,30 @@ class EGLPlatform(Platform):
     def init_context(self):
         _ensure_egl_loaded()
 
-        from OpenGL.EGL import (
-            EGL_SURFACE_TYPE, EGL_PBUFFER_BIT, EGL_BLUE_SIZE,
-            EGL_RED_SIZE, EGL_GREEN_SIZE, EGL_DEPTH_SIZE,
-            EGL_COLOR_BUFFER_TYPE, EGL_RGB_BUFFER,
-            EGL_RENDERABLE_TYPE, EGL_OPENGL_BIT, EGL_CONFORMANT,
-            EGL_NONE, EGL_DEFAULT_DISPLAY, EGL_NO_CONTEXT,
-            EGL_OPENGL_API, EGL_CONTEXT_MAJOR_VERSION,
-            EGL_CONTEXT_MINOR_VERSION,
-            EGL_CONTEXT_OPENGL_PROFILE_MASK,
-            EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT,
-            eglGetDisplay, eglInitialize, eglChooseConfig,
-            eglBindAPI, eglCreateContext, EGLConfig
-        )
         from OpenGL import arrays
+        from OpenGL.EGL import EGL_BLUE_SIZE
+        from OpenGL.EGL import EGL_COLOR_BUFFER_TYPE
+        from OpenGL.EGL import EGL_CONFORMANT
+        from OpenGL.EGL import EGL_CONTEXT_MAJOR_VERSION
+        from OpenGL.EGL import EGL_CONTEXT_MINOR_VERSION
+        from OpenGL.EGL import EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT
+        from OpenGL.EGL import EGL_CONTEXT_OPENGL_PROFILE_MASK
+        from OpenGL.EGL import EGL_DEPTH_SIZE
+        from OpenGL.EGL import EGL_GREEN_SIZE
+        from OpenGL.EGL import EGL_NO_CONTEXT
+        from OpenGL.EGL import EGL_NONE
+        from OpenGL.EGL import EGL_OPENGL_API
+        from OpenGL.EGL import EGL_OPENGL_BIT
+        from OpenGL.EGL import EGL_PBUFFER_BIT
+        from OpenGL.EGL import EGL_RED_SIZE
+        from OpenGL.EGL import EGL_RENDERABLE_TYPE
+        from OpenGL.EGL import EGL_RGB_BUFFER
+        from OpenGL.EGL import EGL_SURFACE_TYPE
+        from OpenGL.EGL import eglBindAPI
+        from OpenGL.EGL import eglChooseConfig
+        from OpenGL.EGL import EGLConfig
+        from OpenGL.EGL import eglCreateContext
+        from OpenGL.EGL import eglInitialize
 
         config_attributes = arrays.GLintArray.asArray([
             EGL_SURFACE_TYPE, EGL_PBUFFER_BIT,
@@ -192,7 +203,8 @@ class EGLPlatform(Platform):
         self.make_current()
 
     def make_current(self):
-        from OpenGL.EGL import eglMakeCurrent, EGL_NO_SURFACE
+        from OpenGL.EGL import EGL_NO_SURFACE
+        from OpenGL.EGL import eglMakeCurrent
         assert eglMakeCurrent(
             self._egl_display, EGL_NO_SURFACE, EGL_NO_SURFACE,
             self._egl_context
@@ -204,7 +216,8 @@ class EGLPlatform(Platform):
         pass
 
     def delete_context(self):
-        from OpenGL.EGL import eglDestroyContext, eglTerminate
+        from OpenGL.EGL import eglDestroyContext
+        from OpenGL.EGL import eglTerminate
         if self._egl_display is not None:
             if self._egl_context is not None:
                 eglDestroyContext(self._egl_display, self._egl_context)

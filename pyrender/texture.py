@@ -4,11 +4,10 @@ https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#reference-tex
 Author: Matthew Matl
 """
 import numpy as np
-
 from OpenGL.GL import *
 
-from .utils import format_texture_source
 from .sampler import Sampler
+from .utils import format_texture_source
 
 
 class Texture(object):
@@ -153,7 +152,7 @@ class Texture(object):
         if self._is_transparent is None:
             self._is_transparent = False
             if self.source_channels == 'RGBA' and self.source is not None:
-                if np.any(self.source[:,:,3] < cutoff):
+                if np.any(self.source[:, :, 3] < cutoff):
                     self._is_transparent = True
         return self._is_transparent
 

@@ -1,10 +1,13 @@
 import os
-from pyrender.constants import (TARGET_OPEN_GL_MAJOR, TARGET_OPEN_GL_MINOR,
-                                MIN_OPEN_GL_MAJOR, MIN_OPEN_GL_MINOR)
-from pyrender.opengl_utils import create_opengl_configs, warn_fallback_version
-from .base import Platform
 
 import OpenGL
+
+from pyrender.constants import TARGET_OPEN_GL_MAJOR
+from pyrender.constants import TARGET_OPEN_GL_MINOR
+from pyrender.opengl_utils import create_opengl_configs
+from pyrender.opengl_utils import warn_fallback_version
+
+from .base import Platform
 
 
 __all__ = ['PygletPlatform']
@@ -29,17 +32,17 @@ class PygletPlatform(Platform):
             pass
 
         self._window = None
-        
+
         # Get OpenGL configurations to try
         confs = create_opengl_configs()
-        
+
         errors = []
         for desc, major, minor, mode, conf in confs:
             try:
                 # For problematic systems, try setting software rendering
                 if desc in ["LEGACY", "MINIMAL"] and not os.environ.get('LIBGL_ALWAYS_SOFTWARE'):
                     os.environ['LIBGL_ALWAYS_SOFTWARE'] = '1'
-                
+
                 self._window = pyglet.window.Window(config=conf, visible=False,
                                                     resizable=False,
                                                     width=1, height=1)
@@ -54,16 +57,16 @@ class PygletPlatform(Platform):
 
         if not self._window:
             error_summary = "\n".join([f"  - {err}" for err in errors])
-            
+
             # Detect WSL for specific troubleshooting
             is_wsl = False
             try:
                 with open('/proc/version', 'r') as f:
                     if 'microsoft' in f.read().lower():
                         is_wsl = True
-            except:
+            except Exception:
                 pass
-            
+
             # Suggest troubleshooting steps
             if is_wsl:
                 troubleshooting = (
@@ -85,7 +88,7 @@ class PygletPlatform(Platform):
                     "4. For debugging: export PYRENDER_DEBUG_OPENGL=1\n"
                     "5. Check: glxinfo | grep 'OpenGL version'"
                 )
-            
+
             raise ValueError(
                 f'Failed to initialize Pyglet window with any OpenGL context.\n'
                 f'Attempted configurations:\n{error_summary}\n'

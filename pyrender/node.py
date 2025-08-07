@@ -4,12 +4,11 @@ https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#reference-nod
 Author: Matthew Matl
 """
 import numpy as np
-
 import trimesh.transformations as transformations
 
 from .camera import Camera
-from .mesh import Mesh
 from .light import Light
+from .mesh import Mesh
 
 
 class Node(object):
@@ -214,9 +213,9 @@ class Node(object):
     @matrix.setter
     def matrix(self, value):
         value = np.asanyarray(value)
-        if value.shape != (4,4):
+        if value.shape != (4, 4):
             raise ValueError('Matrix must be a 4x4 numpy ndarray')
-        if not np.allclose(value[3,:], np.array([0.0, 0.0, 0.0, 1.0])):
+        if not np.allclose(value[3, :], np.array([0.0, 0.0, 0.0, 1.0])):
             raise ValueError('Bottom row of matrix must be [0,0,0,1]')
         self.rotation = Node._q_from_m(value)
         self.scale = Node._s_from_m(value)
@@ -225,39 +224,39 @@ class Node(object):
 
     @staticmethod
     def _t_from_m(m):
-        return m[:3,3]
+        return m[:3, 3]
 
     @staticmethod
     def _r_from_m(m):
-        U = m[:3,:3]
+        U = m[:3, :3]
         norms = np.linalg.norm(U.T, axis=1)
         return U / norms
 
     @staticmethod
     def _q_from_m(m):
         M = np.eye(4)
-        M[:3,:3] = Node._r_from_m(m)
+        M[:3, :3] = Node._r_from_m(m)
         q_wxyz = transformations.quaternion_from_matrix(M)
         return np.roll(q_wxyz, -1)
 
     @staticmethod
     def _s_from_m(m):
-        return np.linalg.norm(m[:3,:3].T, axis=1)
+        return np.linalg.norm(m[:3, :3].T, axis=1)
 
     @staticmethod
     def _r_from_q(q):
         q_wxyz = np.roll(q, 1)
-        return transformations.quaternion_matrix(q_wxyz)[:3,:3]
+        return transformations.quaternion_matrix(q_wxyz)[:3, :3]
 
     @staticmethod
     def _m_from_tqs(t, q, s):
         S = np.eye(4)
-        S[:3,:3] = np.diag(s)
+        S[:3, :3] = np.diag(s)
 
         R = np.eye(4)
-        R[:3,:3] = Node._r_from_q(q)
+        R[:3, :3] = Node._r_from_q(q)
 
         T = np.eye(4)
-        T[:3,3] = t
+        T[:3, 3] = t
 
         return T.dot(R.dot(S))

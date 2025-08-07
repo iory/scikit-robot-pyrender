@@ -5,18 +5,27 @@ Author: Matthew Matl
 import sys
 
 import numpy as np
+from OpenGL.GL import *
 import PIL
 
-from .constants import (RenderFlags, TextAlign, GLTF, BufFlags, TexFlags,
-                        ProgramFlags, DEFAULT_Z_FAR, DEFAULT_Z_NEAR,
-                        SHADOW_TEX_SZ, MAX_N_LIGHTS)
-from .shader_program import ShaderProgramCache
-from .material import MetallicRoughnessMaterial, SpecularGlossinessMaterial
-from .light import PointLight, SpotLight, DirectionalLight
+from .constants import BufFlags
+from .constants import DEFAULT_Z_FAR
+from .constants import DEFAULT_Z_NEAR
+from .constants import GLTF
+from .constants import MAX_N_LIGHTS
+from .constants import ProgramFlags
+from .constants import RenderFlags
+from .constants import SHADOW_TEX_SZ
+from .constants import TexFlags
+from .constants import TextAlign
 from .font import FontCache
+from .light import DirectionalLight
+from .light import PointLight
+from .light import SpotLight
+from .material import MetallicRoughnessMaterial
+from .material import SpecularGlossinessMaterial
+from .shader_program import ShaderProgramCache
 from .utils import format_color_vector
-
-from OpenGL.GL import *
 
 
 class Renderer(object):
@@ -208,10 +217,10 @@ class Renderer(object):
 
         # Set uniforms
         p = np.eye(4)
-        p[0,0] = 2.0 / self.viewport_width
-        p[0,3] = -1.0
-        p[1,1] = 2.0 / self.viewport_height
-        p[1,3] = -1.0
+        p[0, 0] = 2.0 / self.viewport_width
+        p[0, 3] = -1.0
+        p[1, 1] = 2.0 / self.viewport_height
+        p[1, 3] = -1.0
         program.set_uniform('projection', p)
         program.set_uniform('text_color', color)
 
@@ -375,7 +384,7 @@ class Renderer(object):
                 program.set_uniform('V', V)
                 program.set_uniform('P', P)
                 program.set_uniform(
-                    'cam_pos', scene.get_pose(scene.main_camera_node)[:3,3]
+                    'cam_pos', scene.get_pose(scene.main_camera_node)[:3, 3]
                 )
                 if bool(flags & RenderFlags.SEG):
                     program.set_uniform('color', color)
@@ -434,7 +443,7 @@ class Renderer(object):
                 program.set_uniform('V', V)
                 program.set_uniform('P', P)
                 program.set_uniform(
-                    'cam_pos', scene.get_pose(scene.main_camera_node)[:3,3]
+                    'cam_pos', scene.get_pose(scene.main_camera_node)[:3, 3]
                 )
 
                 # Finally, bind and draw the primitive
@@ -645,8 +654,8 @@ class Renderer(object):
         for n in light_nodes:
             light = n.light
             pose = scene.get_pose(n)
-            position = pose[:3,3]
-            direction = -pose[:3,2]
+            position = pose[:3, 3]
+            direction = -pose[:3, 2]
 
             if isinstance(light, PointLight):
                 if plc == max_n_lights[2]:
@@ -695,7 +704,7 @@ class Renderer(object):
                     )
 
     def _sorted_mesh_nodes(self, scene):
-        cam_loc = scene.get_pose(scene.main_camera_node)[:3,3]
+        cam_loc = scene.get_pose(scene.main_camera_node)[:3, 3]
         solid_nodes = []
         trans_nodes = []
         for node in scene.mesh_nodes:
@@ -707,19 +716,19 @@ class Renderer(object):
 
         # TODO BETTER SORTING METHOD
         trans_nodes.sort(
-            key=lambda n: -np.linalg.norm(scene.get_pose(n)[:3,3] - cam_loc)
+            key=lambda n: -np.linalg.norm(scene.get_pose(n)[:3, 3] - cam_loc)
         )
         solid_nodes.sort(
-            key=lambda n: -np.linalg.norm(scene.get_pose(n)[:3,3] - cam_loc)
+            key=lambda n: -np.linalg.norm(scene.get_pose(n)[:3, 3] - cam_loc)
         )
 
         return solid_nodes + trans_nodes
 
     def _sorted_nodes_by_distance(self, scene, nodes, compare_node):
         nodes = list(nodes)
-        compare_posn = scene.get_pose(compare_node)[:3,3]
+        compare_posn = scene.get_pose(compare_node)[:3, 3]
         nodes.sort(key=lambda n: np.linalg.norm(
-            scene.get_pose(n)[:3,3] - compare_posn)
+            scene.get_pose(n)[:3, 3] - compare_posn)
         )
         return nodes
 
@@ -831,10 +840,10 @@ class Renderer(object):
         camera = light._get_shadow_camera(s)
         P = camera.get_projection_matrix()
         if isinstance(light, DirectionalLight):
-            direction = -pose[:3,2]
+            direction = -pose[:3, 2]
             c = scene.centroid
             loc = c - direction * s
-            pose[:3,3] = loc
+            pose[:3, 3] = loc
         V = np.linalg.inv(pose)  # V maps from world to camera
         return V, P
 
@@ -1230,7 +1239,7 @@ class Renderer(object):
                 program.set_uniform('V', V)
                 program.set_uniform('P', P)
                 program.set_uniform(
-                    'cam_pos', scene.get_pose(scene.main_camera_node)[:3,3]
+                    'cam_pos', scene.get_pose(scene.main_camera_node)[:3, 3]
                 )
 
                 # Next, bind the lighting

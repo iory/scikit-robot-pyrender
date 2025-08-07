@@ -4,16 +4,16 @@ https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_ligh
 Author: Matthew Matl
 """
 import abc
+
 import numpy as np
+from OpenGL.GL import *
 import six
 
-from OpenGL.GL import *
-
-from .utils import format_color_vector
-from .texture import Texture
+from .camera import OrthographicCamera
+from .camera import PerspectiveCamera
 from .constants import SHADOW_TEX_SZ
-from .camera import OrthographicCamera, PerspectiveCamera
-
+from .texture import Texture
+from .utils import format_color_vector
 
 
 @six.add_metaclass(abc.ABCMeta)

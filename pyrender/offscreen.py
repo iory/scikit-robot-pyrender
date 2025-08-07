@@ -4,8 +4,8 @@ Author: Matthew Matl
 """
 import os
 
-from .renderer import Renderer
 from .constants import RenderFlags
+from .renderer import Renderer
 
 
 class OffscreenRenderer(object):
