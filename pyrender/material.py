@@ -355,7 +355,7 @@ class MetallicRoughnessMaterial(Material):
         The alphaMode property specifies how alpha is interpreted.
         The stored texels must not be premultiplied.
     metallicFactor : float
-        The metalness of the material. A value of 1.0 means the material is a
+        The metallicity of the material. A value of 1.0 means the material is a
         metal. A value of 0.0 means the material is a dielectric. Values in
         between are for blending between metals and dielectrics such as dirty
         metallic surfaces. This value is linear. If a metallicRoughnessTexture
@@ -366,7 +366,7 @@ class MetallicRoughnessMaterial(Material):
         smooth. This value is linear. If a metallicRoughnessTexture is
         specified, this value is multiplied with the roughness texel values.
     metallicRoughnessTexture : (n,n,2) float or :class:`Texture`, optional
-        The metallic-roughness texture. The metalness values are sampled from
+        The metallic-roughness texture. The metallicity values are sampled from
         the B channel. The roughness values are sampled from the G channel.
         These values are linear. If other channels are present (R or A), they
         are ignored for metallic-roughness calculations.
@@ -436,7 +436,7 @@ class MetallicRoughnessMaterial(Material):
 
     @property
     def metallicFactor(self):
-        """float : The metalness of the material.
+        """float : The metallicity of the material.
         """
         return self._metallicFactor
 

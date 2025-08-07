@@ -236,7 +236,7 @@ float microfacet_distribution(PBRInfo info)
 }
 
 vec3 compute_brdf(vec3 n, vec3 v, vec3 l,
-                  float roughness, float metalness,
+                  float roughness, float metallicity,
                   vec3 f0, vec3 c_diff, vec3 albedo,
                   vec3 radiance)
 {
@@ -247,7 +247,7 @@ vec3 compute_brdf(vec3 n, vec3 v, vec3 l,
         float lh = clamp(dot(l, h), 0.0, 1.0);
         float vh = clamp(dot(v, h), 0.0, 1.0);
 
-        PBRInfo info = PBRInfo(nl, nv, nh, lh, vh, roughness, metalness, f0, c_diff);
+        PBRInfo info = PBRInfo(nl, nv, nh, lh, vh, roughness, metallicity, f0, c_diff);
 
         // Compute PBR terms
         vec3 F = specular_reflection(info);
