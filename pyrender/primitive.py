@@ -90,7 +90,7 @@ class Primitive(object):
         self.poses = poses
 
         self._bounds = None
-        self._vaid = None
+        self._vertex_array_id = None
         self._buffers = []
         self._is_transparent = None
         self._buf_flags = None
@@ -320,12 +320,12 @@ class Primitive(object):
         return self._compute_transparency()
 
     def _add_to_context(self):
-        if self._vaid is not None:
+        if self._vertex_array_id is not None:
             raise ValueError('Mesh is already bound to a context')
 
         # Generate and bind VAO
-        self._vaid = glGenVertexArrays(1)
-        glBindVertexArray(self._vaid)
+        self._vertex_array_id = glGenVertexArrays(1)
+        glBindVertexArray(self._vertex_array_id)
 
         #######################################################################
         # Fill vertex buffer
@@ -428,20 +428,20 @@ class Primitive(object):
         glBindVertexArray(0)
 
     def _remove_from_context(self):
-        if self._vaid is not None:
-            glDeleteVertexArrays(1, [self._vaid])
+        if self._vertex_array_id is not None:
+            glDeleteVertexArrays(1, [self._vertex_array_id])
             glDeleteBuffers(len(self._buffers), self._buffers)
-            self._vaid = None
+            self._vertex_array_id = None
             self._buffers = []
 
     def _in_context(self):
-        return self._vaid is not None
+        return self._vertex_array_id is not None
 
     def _bind(self):
-        if self._vaid is None:
+        if self._vertex_array_id is None:
             raise ValueError('Cannot bind a Mesh that has not been added '
                              'to a context')
-        glBindVertexArray(self._vaid)
+        glBindVertexArray(self._vertex_array_id)
 
     def _unbind(self):
         glBindVertexArray(0)
