@@ -6,8 +6,7 @@ Author: Matthew Matl
 import sys
 from setuptools import setup
 
-# load __version__
-exec(open('pyrender/version.py').read())
+__version__ = '0.1.45'
 
 def get_imageio_dep():
     if sys.version[0] == "2":
