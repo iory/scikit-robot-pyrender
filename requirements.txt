@@ -3,12 +3,8 @@ imageio
 networkx
 numpy
 Pillow
-pyglet==1.4.0a1
+pyglet<2.0
 PyOpenGL
 PyOpenGL_accelerate
 six
 trimesh
-sphinx
-sphinx_rtd_theme
-sphinx-automodapi
-
