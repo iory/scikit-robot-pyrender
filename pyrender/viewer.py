@@ -23,6 +23,7 @@ from .constants import (TARGET_OPEN_GL_MAJOR, TARGET_OPEN_GL_MINOR,
                         MIN_OPEN_GL_MAJOR, MIN_OPEN_GL_MINOR,
                         TEXT_PADDING, DEFAULT_SCENE_SCALE,
                         DEFAULT_Z_FAR, DEFAULT_Z_NEAR, RenderFlags, TextAlign)
+from .opengl_utils import create_opengl_configs, warn_fallback_version
 from .light import DirectionalLight
 from .node import Node
 from .camera import PerspectiveCamera, OrthographicCamera, IntrinsicsCamera
@@ -1000,35 +1001,50 @@ class Viewer(pyglet.window.Window):
         # and multisampling and removing these options if exception
         # Note: multisampling not available on all hardware
         from pyglet.gl import Config
-        confs = [Config(sample_buffers=1, samples=4,
-                        depth_size=24,
-                        double_buffer=True,
-                        major_version=TARGET_OPEN_GL_MAJOR,
-                        minor_version=TARGET_OPEN_GL_MINOR),
-                 Config(depth_size=24,
-                        double_buffer=True,
-                        major_version=TARGET_OPEN_GL_MAJOR,
-                        minor_version=TARGET_OPEN_GL_MINOR),
-                 Config(sample_buffers=1, samples=4,
-                        depth_size=24,
-                        double_buffer=True,
-                        major_version=MIN_OPEN_GL_MAJOR,
-                        minor_version=MIN_OPEN_GL_MINOR),
-                 Config(depth_size=24,
-                        double_buffer=True,
-                        major_version=MIN_OPEN_GL_MAJOR,
-                        minor_version=MIN_OPEN_GL_MINOR)]
-        for conf in confs:
+        
+        # Get OpenGL configurations to try
+        confs = create_opengl_configs()
+        
+        errors = []
+        context_initialized = False
+        for desc, major, minor, mode, conf in confs:
             try:
+                # For problematic systems, try setting software rendering
+                if desc in ["LEGACY", "MINIMAL"] and not os.environ.get('LIBGL_ALWAYS_SOFTWARE'):
+                    os.environ['LIBGL_ALWAYS_SOFTWARE'] = '1'
+                
                 super(Viewer, self).__init__(config=conf, resizable=True,
                                              width=self._viewport_size[0],
                                              height=self._viewport_size[1])
+                context_initialized = True
+                # Success - warn if using fallback version
+                warn_fallback_version(major, minor, TARGET_OPEN_GL_MAJOR, TARGET_OPEN_GL_MINOR)
                 break
-            except pyglet.window.NoSuchConfigException:
-                pass
+            except Exception as e:
+                # Catch all exceptions during context creation
+                error_msg = f"OpenGL {major}.{minor} {mode}: {type(e).__name__}: {e}"
+                errors.append(error_msg)
+                continue
 
-        if not self.context:
-            raise ValueError('Unable to initialize an OpenGL 3+ context')
+        if not context_initialized or not self.context:
+            error_summary = "\n".join([f"  - {err}" for err in errors])
+            
+            # Suggest troubleshooting steps
+            troubleshooting = (
+                "\nTroubleshooting suggestions:\n"
+                "1. For SSH/headless: export DISPLAY=:0 or use VirtualGL\n"
+                "2. For software rendering: export LIBGL_ALWAYS_SOFTWARE=1\n"
+                "3. For Mesa override: export MESA_GL_VERSION_OVERRIDE=3.3\n"
+                "4. For debugging: export PYRENDER_DEBUG_OPENGL=1\n"
+                "5. Check: glxinfo | grep 'OpenGL version'"
+            )
+            
+            raise ValueError(
+                f'Unable to initialize any OpenGL context.\n'
+                f'Attempted configurations:\n{error_summary}\n'
+                f'Minimum requirement: OpenGL {MIN_OPEN_GL_MAJOR}.{MIN_OPEN_GL_MINOR}+\n'
+                f'{troubleshooting}'
+            )
         clock.schedule_interval(
             Viewer._time_event, 1.0 / self.viewer_flags['refresh_rate'], self
         )
