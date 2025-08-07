@@ -3,7 +3,7 @@ import sys
 from setuptools import setup
 
 
-__version__ = '0.1.45'
+version = '0.1.45'
 
 
 def get_imageio_dep():
@@ -43,7 +43,7 @@ docs_requirements = [
 
 setup(
     name='scikit-robot-pyrender',
-    version=__version__,
+    version=version,
     description='Easy-to-use Python renderer for 3D visualization',
     long_description='A simple implementation of Physically-Based Rendering '
                        '(PBR) in Python. Compliant with the glTF 2.0 standard. '
