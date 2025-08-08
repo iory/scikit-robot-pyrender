@@ -572,7 +572,15 @@ class Viewer(pyglet.window.Window):
         finally:
             self._is_active = False
             super(Viewer, self).on_close()
-            pyglet.app.exit()
+            # Handle macOS-specific issue with CocoaAlternateEventLoop
+            if sys.platform == 'darwin':
+                try:
+                    pyglet.app.exit()
+                except AttributeError:
+                    # CocoaAlternateEventLoop may not have platform_event_loop attribute
+                    pass
+            else:
+                pyglet.app.exit()
 
     def on_draw(self):
         """Redraw the scene into the viewing window.
