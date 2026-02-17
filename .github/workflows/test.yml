@@ -60,6 +60,8 @@ jobs:
             os: ubuntu-latest
           - python-version: "3.13"
             os: ubuntu-latest
+          - python-version: "3.14"
+            os: ubuntu-latest
       fail-fast: false
     steps:
     - uses: actions/checkout@v3
