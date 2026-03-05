@@ -353,13 +353,22 @@ class Renderer(object):
         V, P = self._get_camera_matrices(scene)
 
         program = None
-        # Now, render each object in sorted order
+
+        # Separate nodes into normal and always_on_top
+        normal_nodes = []
+        always_on_top_nodes = []
         for node in self._sorted_mesh_nodes(scene):
             mesh = node.mesh
-
-            # Skip the mesh if it's not visible
             if not mesh.is_visible:
                 continue
+            if mesh.always_on_top:
+                always_on_top_nodes.append(node)
+            else:
+                normal_nodes.append(node)
+
+        # First pass: render normal meshes with depth testing
+        for node in normal_nodes:
+            mesh = node.mesh
 
             # If SEG, set color
             if bool(flags & RenderFlags.SEG):
@@ -402,6 +411,57 @@ class Renderer(object):
                     flags=flags
                 )
                 self._reset_active_textures()
+
+        # Second pass: render always_on_top meshes with depth testing disabled
+        if always_on_top_nodes:
+            glDisable(GL_DEPTH_TEST)
+
+            for node in always_on_top_nodes:
+                mesh = node.mesh
+
+                # If SEG, set color
+                if bool(flags & RenderFlags.SEG):
+                    if node not in seg_node_map:
+                        continue
+                    color = seg_node_map[node]
+                    if not isinstance(color, (list, tuple, np.ndarray)):
+                        color = np.repeat(color, 3)
+                    else:
+                        color = np.asanyarray(color)
+                    color = color / 255.0
+
+                for primitive in mesh.primitives:
+
+                    # First, get and bind the appropriate program
+                    program = self._get_primitive_program(
+                        primitive, flags, ProgramFlags.USE_MATERIAL
+                    )
+                    program._bind()
+
+                    # Set the camera uniforms
+                    program.set_uniform('V', V)
+                    program.set_uniform('P', P)
+                    program.set_uniform(
+                        'cam_pos', scene.get_pose(scene.main_camera_node)[:3, 3]
+                    )
+                    if bool(flags & RenderFlags.SEG):
+                        program.set_uniform('color', color)
+
+                    # Next, bind the lighting
+                    if not (flags & RenderFlags.DEPTH_ONLY or flags & RenderFlags.FLAT or
+                            flags & RenderFlags.SEG):
+                        self._bind_lighting(scene, program, node, flags)
+
+                    # Finally, bind and draw the primitive
+                    self._bind_and_draw_primitive(
+                        primitive=primitive,
+                        pose=scene.get_pose(node),
+                        program=program,
+                        flags=flags
+                    )
+                    self._reset_active_textures()
+
+            glEnable(GL_DEPTH_TEST)
 
         # Unbind the shader and flush the output
         if program is not None:
