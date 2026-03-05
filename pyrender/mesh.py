@@ -26,13 +26,18 @@ class Mesh(object):
         Array of weights to be applied to the Morph Targets.
     is_visible : bool
         If False, the mesh will not be rendered.
+    always_on_top : bool
+        If True, the mesh will be rendered on top of other objects
+        (depth test disabled). Default is False.
     """
 
-    def __init__(self, primitives, name=None, weights=None, is_visible=True):
+    def __init__(self, primitives, name=None, weights=None, is_visible=True,
+                 always_on_top=False):
         self.primitives = primitives
         self.name = name
         self.weights = weights
         self.is_visible = is_visible
+        self.always_on_top = always_on_top
 
         self._bounds = None
 
@@ -120,6 +125,16 @@ class Mesh(object):
                 return True
         return False
 
+    @property
+    def always_on_top(self):
+        """bool : If True, the mesh is rendered on top of other objects.
+        """
+        return self._always_on_top
+
+    @always_on_top.setter
+    def always_on_top(self, value):
+        self._always_on_top = bool(value)
+
     @staticmethod
     def from_points(points, colors=None, normals=None,
                     is_visible=True, poses=None):
@@ -155,7 +170,8 @@ class Mesh(object):
 
     @staticmethod
     def from_trimesh(mesh, material=None, is_visible=True,
-                     poses=None, wireframe=False, smooth=True):
+                     poses=None, wireframe=False, smooth=True,
+                     always_on_top=False):
         """Create a Mesh from a :class:`~trimesh.base.Trimesh`.
 
         Parameters
@@ -175,6 +191,9 @@ class Mesh(object):
         smooth : bool
             If `True`, the mesh will be rendered with interpolated vertex
             normals. Otherwise, the mesh edges will stay sharp.
+        always_on_top : bool
+            If True, the mesh will be rendered on top of other objects
+            (depth test disabled). Default is False.
 
         Returns
         -------
@@ -236,7 +255,8 @@ class Mesh(object):
                 poses=poses
             ))
 
-        return Mesh(primitives=primitives, is_visible=is_visible)
+        return Mesh(primitives=primitives, is_visible=is_visible,
+                    always_on_top=always_on_top)
 
     @staticmethod
     def _get_trimesh_props(mesh, smooth=False, material=None):
