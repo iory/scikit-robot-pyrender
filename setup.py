@@ -3,7 +3,7 @@ import sys
 from setuptools import setup
 
 
-version = '0.1.49'
+version = '0.1.50'
 
 
 def get_imageio_dep():
